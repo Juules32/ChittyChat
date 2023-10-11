@@ -1,20 +1,16 @@
 syntax = "proto3";
 option go_package = "https://github.com/Juules32/ChristiansAlgorithm/proto";
-package proto;
-import "google/protobuf/timestamp.proto"; // Correct import path
 
-service StreamingService
-{
-    rpc StreamData(stream DataRequest) returns (stream DataResponse);
+package chat;
+
+service ChatService {
+    rpc SendMessage(stream MessageRequest) returns (stream MessageResponse);
 }
 
-message DataRequest {
-    google.protobuf.Timestamp timeSentFromClient = 1;
+message MessageRequest {
+    string message = 1;
 }
 
-message DataResponse {
-    google.protobuf.Timestamp timeSentFromClient = 1;
-    google.protobuf.Timestamp timeReceivedAtServer = 2;
-    google.protobuf.Timestamp timeSentFromServer = 3;
+message MessageResponse {
+    string message = 1;
 }
-
