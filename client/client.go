@@ -1,8 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"context"
+	"fmt"
 	"log"
+	"math/rand"
+	"os"
 
 	pb "github.com/Juules32/GRPC/proto" // Import the generated protobuf code
 	"google.golang.org/grpc"
@@ -27,21 +31,21 @@ func main() {
 			res, err := stream.Recv()
 			if err != nil {
 			}
-			log.Printf("Received message from server: %s", res.Message)
+			fmt.Println("Received message:", res.Message, " From Client:", res.ID)
 		}
 	}()
+	reader := bufio.NewReader(os.Stdin)
 
-	// Send messages to the server (optional)
-	messages := []string{"Hello", "World"}
-	for _, message := range messages {
-		req := &pb.MessageRequest{Message: message}
-		if err := stream.Send(req); err != nil {
-			log.Printf("Error sending message to server: %v", err)
-			break
-		}
-	}
+	id := rand.Intn(1000000)
 
 	for {
+		message, _ := reader.ReadString('\n')
+
+		// Send messages to the server (optional)
+		req := &pb.MessageRequest{Message: message, ID: int32(id)}
+		if err := stream.Send(req); err != nil {
+			log.Printf("Error sending message to server: %v", err)
+		}
 
 	}
 

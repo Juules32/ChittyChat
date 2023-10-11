@@ -12,64 +12,59 @@ import (
 )
 
 type chatServer struct {
-	clients map[chan<- *pb.MessageResponse]struct{}
+	clients map[pb.ChatService_SendMessageServer]struct{}
 	mu      sync.RWMutex
 }
 
 func newChatServer() *chatServer {
 	return &chatServer{
-		clients: make(map[chan<- *pb.MessageResponse]struct{}),
+		clients: make(map[pb.ChatService_SendMessageServer]struct{}),
 	}
 }
 
 func (s *chatServer) SendMessage(stream pb.ChatService_SendMessageServer) error {
-	clientCh := make(chan *pb.MessageResponse)
-	s.addClient(clientCh)
-	defer s.removeClient(clientCh)
+	s.addClient(stream)
+	defer s.removeClient(stream)
 
 	for {
 		msgReq, err := stream.Recv()
-
 		if err != nil {
-
+			log.Printf("Error receiving message from client: %v", err)
+			break
 		}
-		fmt.Println(msgReq.Message)
+
+		fmt.Println("Received message:", msgReq.Message, "From client:", msgReq.ID)
 
 		// Broadcast the message to all connected clients
-		s.broadcastMessage(msgReq.Message)
-
-		// Send a response to the client (optional)
-		response := &pb.MessageResponse{Message: "Message received"}
-		if err := stream.Send(response); err != nil {
-			log.Printf("Error sending response to client: %v", err)
-		}
+		s.broadcastMessage(msgReq.Message, msgReq.ID)
 	}
 
 	return nil
 }
 
-func (s *chatServer) addClient(clientCh chan<- *pb.MessageResponse) {
+func (s *chatServer) addClient(clientStream pb.ChatService_SendMessageServer) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.clients[clientCh] = struct{}{}
+	s.clients[clientStream] = struct{}{}
 }
 
-func (s *chatServer) removeClient(clientCh chan<- *pb.MessageResponse) {
+func (s *chatServer) removeClient(clientStream pb.ChatService_SendMessageServer) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	delete(s.clients, clientCh)
-	close(clientCh)
+	delete(s.clients, clientStream)
 }
 
-func (s *chatServer) broadcastMessage(message string) {
+func (s *chatServer) broadcastMessage(message string, id int32) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	for clientCh := range s.clients {
-		fmt.Println("heya")
-		go func(ch chan<- *pb.MessageResponse, message string) {
-			ch <- &pb.MessageResponse{Message: message}
-		}(clientCh, message)
+	for clientStream := range s.clients {
+		go func(stream pb.ChatService_SendMessageServer, message string) {
+			response := &pb.MessageResponse{Message: message, ID: id}
+			if err := stream.Send(response); err != nil {
+				log.Printf("Error sending message to client: %v", err)
+			}
+		}(clientStream, message)
 	}
 }
 
