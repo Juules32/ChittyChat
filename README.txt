@@ -5,4 +5,4 @@ To run client(s):
 go run client/client.go
 
 Then, in each client, you can write a message to stdin that 
-will be broadcasted to each other active client.
+will be broadcast to each other active client.
