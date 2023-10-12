@@ -1,8 +1,5 @@
 To run the server:
 go run server/server.go
 
-To run client(s):
+To run client(s) in new terminal:
 go run client/client.go
-
-Then, in each client, you can write a message to stdin that 
-will be broadcasted to each other active client.

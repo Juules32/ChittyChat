@@ -16,27 +16,25 @@ type chatServer struct {
 	mu      sync.RWMutex
 }
 
-func newChatServer() *chatServer {
-	return &chatServer{
-		clients: make(map[pb.ChatService_SendMessageServer]struct{}),
-	}
-}
-
 func (s *chatServer) SendMessage(stream pb.ChatService_SendMessageServer) error {
+
+	// Adds client stream to list of clients when connection is established
 	s.addClient(stream)
+
+	// Removes client stream from list of clients once connection is cut
 	defer s.removeClient(stream)
 
+	// Continuously listens for incoming messages
 	for {
-		msgReq, err := stream.Recv()
+		req, err := stream.Recv()
 		if err != nil {
-			log.Printf("Error receiving message from client: %v", err)
 			break
 		}
 
-		fmt.Println("Received message:", msgReq.Message, "From client:", msgReq.ID)
+		fmt.Println(req.Message)
 
-		// Broadcast the message to all connected clients
-		s.broadcastMessage(msgReq.Message, msgReq.ID)
+		// Broadcasts the message to all connected clients
+		s.broadcastMessage(req.Message)
 	}
 
 	return nil
@@ -44,24 +42,25 @@ func (s *chatServer) SendMessage(stream pb.ChatService_SendMessageServer) error 
 
 func (s *chatServer) addClient(clientStream pb.ChatService_SendMessageServer) {
 	s.mu.Lock()
-	defer s.mu.Unlock()
 	s.clients[clientStream] = struct{}{}
+	s.mu.Unlock()
 }
 
 func (s *chatServer) removeClient(clientStream pb.ChatService_SendMessageServer) {
 	s.mu.Lock()
-	defer s.mu.Unlock()
 	delete(s.clients, clientStream)
+	s.mu.Unlock()
 }
 
-func (s *chatServer) broadcastMessage(message string, id int32) {
+func (s *chatServer) broadcastMessage(message string) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
+	// Broadcast the published message to each client asynchronously
+	// This works partially because the response is a stream
 	for clientStream := range s.clients {
 		go func(stream pb.ChatService_SendMessageServer, message string) {
-			response := &pb.MessageResponse{Message: message, ID: id}
-			if err := stream.Send(response); err != nil {
+			if err := stream.Send(&pb.Message{Message: message}); err != nil {
 				log.Printf("Error sending message to client: %v", err)
 			}
 		}(clientStream, message)
@@ -75,10 +74,9 @@ func main() {
 	}
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterChatServiceServer(grpcServer, newChatServer())
+	pb.RegisterChatServiceServer(grpcServer, &chatServer{
+		clients: make(map[pb.ChatService_SendMessageServer]struct{}),
+	})
 	reflection.Register(grpcServer)
-
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
-	}
+	grpcServer.Serve(lis)
 }

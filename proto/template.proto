@@ -4,15 +4,9 @@ option go_package = "https://github.com/Juules32/ChristiansAlgorithm/proto";
 package chat;
 
 service ChatService {
-    rpc SendMessage(stream MessageRequest) returns (stream MessageResponse);
+    rpc SendMessage(stream Message) returns (stream Message);
 }
 
-message MessageRequest {
+message Message {
     string message = 1;
-    int32 ID = 2;
-}
-
-message MessageResponse {
-    string message = 1;
-    int32 ID = 2;
 }

@@ -1,0 +1,2 @@
+- Gør så der ikke kommer et tomt "<name> says:" inden man leaver chatten
+- Skjul input når man har skrevet det for at gøre terminalen pænere

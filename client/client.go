@@ -5,8 +5,11 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math/rand"
 	"os"
+	"os/signal"
+	"strings"
+	"syscall"
+	"time"
 
 	pb "github.com/Juules32/GRPC/proto" // Import the generated protobuf code
 	"google.golang.org/grpc"
@@ -26,23 +29,45 @@ func main() {
 		log.Fatalf("Error creating stream: %v", err)
 	}
 
+	// Listen for incoming broadcasts asynchronously
 	go func() {
 		for {
 			res, err := stream.Recv()
 			if err != nil {
 			}
-			fmt.Println("Received message:", res.Message, " From Client:", res.ID)
+			fmt.Println(res.Message)
 		}
 	}()
-	reader := bufio.NewReader(os.Stdin)
 
-	id := rand.Intn(1000000)
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Please enter your name: ")
+	name, _ := reader.ReadString('\n')
+	name = strings.ReplaceAll(name, "\r\n", "")
+
+	enterRequest := &pb.Message{Message: name + " has joined the chat"}
+	if err := stream.Send(enterRequest); err != nil {
+		log.Printf("Error sending message to server: %v", err)
+	}
+
+	// Handle termination signal to send a leave message
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-sigCh // Wait for termination signal
+		leaveRequest := &pb.Message{Message: name + " has left the chat"}
+		if err := stream.Send(leaveRequest); err != nil {
+			log.Printf("Error sending message to server: %v", err)
+		}
+		time.Sleep(time.Millisecond * 100)
+		os.Exit(0)
+	}()
 
 	for {
 		message, _ := reader.ReadString('\n')
+		message = strings.ReplaceAll(message, "\r\n", "")
 
-		// Send messages to the server (optional)
-		req := &pb.MessageRequest{Message: message, ID: int32(id)}
+		req := &pb.Message{Message: name + " says: " + message}
 		if err := stream.Send(req); err != nil {
 			log.Printf("Error sending message to server: %v", err)
 		}
