@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 	"sync"
 
 	pb "github.com/Juules32/GRPC/proto" // Import the generated protobuf code
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
+
+var t int32 = 0
 
 type chatServer struct {
 	clients map[pb.ChatService_SendMessageServer]struct{}
@@ -26,15 +29,27 @@ func (s *chatServer) SendMessage(stream pb.ChatService_SendMessageServer) error 
 
 	// Continuously listens for incoming messages
 	for {
-		req, err := stream.Recv()
+		res, err := stream.Recv()
 		if err != nil {
 			break
 		}
+		tReceived := res.Timestamp
+		if tReceived > t {
+			t = tReceived
+		}
+		t++
 
-		fmt.Println(req.Message)
+		log.Println("Server receives message: "+res.Message+" at timestamp:", t)
+		fmt.Println(res.Message, t)
+
+		//Important question: should t be incremented here?
+		//maybe it should be incremented before each broadcast recipient?
+		//maybe not at all?
+		t++
 
 		// Broadcasts the message to all connected clients
-		s.broadcastMessage(req.Message)
+		log.Println("Server broadcasts message: "+res.Message+" at timestamp:", t)
+		s.broadcastMessage(res.Message, t)
 	}
 
 	return nil
@@ -52,7 +67,7 @@ func (s *chatServer) removeClient(clientStream pb.ChatService_SendMessageServer)
 	s.mu.Unlock()
 }
 
-func (s *chatServer) broadcastMessage(message string) {
+func (s *chatServer) broadcastMessage(message string, timestamp int32) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -60,7 +75,7 @@ func (s *chatServer) broadcastMessage(message string) {
 	// This works partially because the response is a stream
 	for clientStream := range s.clients {
 		go func(stream pb.ChatService_SendMessageServer, message string) {
-			if err := stream.Send(&pb.Message{Message: message}); err != nil {
+			if err := stream.Send(&pb.Message{Message: message, Timestamp: timestamp}); err != nil {
 				log.Printf("Error sending message to client: %v", err)
 			}
 		}(clientStream, message)
@@ -68,6 +83,14 @@ func (s *chatServer) broadcastMessage(message string) {
 }
 
 func main() {
+	err := os.Remove("log")
+	f, err := os.OpenFile("log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer f.Close()
+	log.SetOutput(f)
+
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)

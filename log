@@ -1,0 +1,16 @@
+2023/10/17 16:08:50 Client: Peter joins chat at lamport timestamp: 1
+2023/10/17 16:08:50 Server receives message: Peter has joined the chat at timestamp: 2
+2023/10/17 16:08:50 Server broadcasts message: Peter has joined the chat at timestamp: 3
+2023/10/17 16:08:50 Client: Peter receives broadcasted message: Peter has joined the chat at timestamp: 4
+2023/10/17 16:08:54 Client: Peter publishes message: Peter says: Hejsaat lamport timestamp: 5
+2023/10/17 16:08:54 Server receives message: Peter says: Hejsa at timestamp: 6
+2023/10/17 16:08:54 Server broadcasts message: Peter says: Hejsa at timestamp: 7
+2023/10/17 16:08:54 Client: Peter receives broadcasted message: Peter says: Hejsa at timestamp: 8
+2023/10/17 16:09:00 Client: Peter publishes message: Peter says: at lamport timestamp: 9
+2023/10/17 16:09:00 Client: Peter leaves chat at lamport timestamp: 10
+2023/10/17 16:09:00 Server receives message: Peter says:  at timestamp: 10
+2023/10/17 16:09:00 Server broadcasts message: Peter says:  at timestamp: 11
+2023/10/17 16:09:00 Server receives message: Peter has left the chat at timestamp: 12
+2023/10/17 16:09:00 Server broadcasts message: Peter has left the chat at timestamp: 13
+2023/10/17 16:09:00 Client: Peter receives broadcasted message: Peter says:  at timestamp: 12
+2023/10/17 16:09:00 Client: Peter receives broadcasted message: Peter has left the chat at timestamp: 14
