@@ -34,7 +34,7 @@ func (s *chatServer) SendMessage(stream pb.ChatService_SendMessageServer) error 
 		s.mu.Lock()
 
 		log.Println("Server receives and broadcasts message: \""+pub.Message+"\" with timestamp:", pub.Timestamp)
-		fmt.Println(pub.Message, pub.Timestamp)
+		fmt.Println("Server receives and broadcasts message: \""+pub.Message+"\" with timestamp:", pub.Timestamp)
 
 		// Broadcasts the message to all connected clients
 		s.broadcastMessage(pub.Message, pub.Timestamp)

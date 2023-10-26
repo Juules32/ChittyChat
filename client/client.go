@@ -60,7 +60,6 @@ func main() {
 			}
 			t++
 			log.Println("Client "+name+" receives broadcasted message: \""+res.Message+"\" at timestamp:", +t)
-			fmt.Println(res.Message, t)
 			mu.Unlock()
 		}
 	}()
@@ -93,6 +92,7 @@ func main() {
 	}()
 
 	for {
+		fmt.Print("Please enter a message: ")
 		message, _ := reader.ReadString('\n')
 		message = strings.ReplaceAll(message, "\r\n", "")
 		mu.Lock()
@@ -101,8 +101,10 @@ func main() {
 		log.Println("Client "+name+" publishes message: \""+req.Message+"\" at lamport timestamp:", req.Timestamp)
 		if err := stream.Send(req); err != nil {
 			log.Printf("Error sending message to server: %v", err)
+			return
 		}
 		mu.Unlock()
+		fmt.Println("Message sent successfully!")
 	}
 
 }
