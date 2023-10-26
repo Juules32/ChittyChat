@@ -12,11 +12,9 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var t int32 = 0
-
 type chatServer struct {
 	clients map[pb.ChatService_SendMessageServer]struct{}
-	mu      sync.RWMutex
+	mu      sync.Mutex
 }
 
 func (s *chatServer) SendMessage(stream pb.ChatService_SendMessageServer) error {
@@ -29,27 +27,19 @@ func (s *chatServer) SendMessage(stream pb.ChatService_SendMessageServer) error 
 
 	// Continuously listens for incoming messages
 	for {
-		res, err := stream.Recv()
+		pub, err := stream.Recv()
 		if err != nil {
 			break
 		}
-		tReceived := res.Timestamp
-		if tReceived > t {
-			t = tReceived
-		}
-		t++
+		s.mu.Lock()
 
-		log.Println("Server receives message: "+res.Message+" at timestamp:", t)
-		fmt.Println(res.Message, t)
-
-		//Important question: should t be incremented here?
-		//maybe it should be incremented before each broadcast recipient?
-		//maybe not at all?
-		t++
+		log.Println("Server receives and broadcasts message: \""+pub.Message+"\" with timestamp:", pub.Timestamp)
+		fmt.Println(pub.Message, pub.Timestamp)
 
 		// Broadcasts the message to all connected clients
-		log.Println("Server broadcasts message: "+res.Message+" at timestamp:", t)
-		s.broadcastMessage(res.Message, t)
+		s.broadcastMessage(pub.Message, pub.Timestamp)
+
+		s.mu.Unlock()
 	}
 
 	return nil
@@ -68,9 +58,6 @@ func (s *chatServer) removeClient(clientStream pb.ChatService_SendMessageServer)
 }
 
 func (s *chatServer) broadcastMessage(message string, timestamp int32) {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-
 	// Broadcast the published message to each client asynchronously
 	// This works partially because the response is a stream
 	for clientStream := range s.clients {

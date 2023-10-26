@@ -59,7 +59,7 @@ func main() {
 				t = tReceived
 			}
 			t++
-			log.Println("Client: "+name+" receives broadcasted message: "+res.Message+" at timestamp:", +t)
+			log.Println("Client "+name+" receives broadcasted message: \""+res.Message+"\" at timestamp:", +t)
 			fmt.Println(res.Message, t)
 			mu.Unlock()
 		}
@@ -68,7 +68,7 @@ func main() {
 	mu.Lock()
 	t++
 	enterRequest := &pb.Message{Message: name + " has joined the chat", Timestamp: t}
-	log.Println("Client: "+name+" joins chat at lamport timestamp:", enterRequest.Timestamp)
+	log.Println("Client "+name+" joins chat at lamport timestamp:", enterRequest.Timestamp)
 	if err := stream.Send(enterRequest); err != nil {
 		log.Printf("Error sending message to server: %v", err)
 	}
@@ -83,7 +83,7 @@ func main() {
 		mu.Lock()
 		t++
 		leaveRequest := &pb.Message{Message: name + " has left the chat", Timestamp: t}
-		log.Println("Client: "+name+" leaves chat at lamport timestamp:", leaveRequest.Timestamp)
+		log.Println("Client "+name+" leaves chat at lamport timestamp:", leaveRequest.Timestamp)
 		if err := stream.Send(leaveRequest); err != nil {
 			log.Printf("Error sending message to server: %v", err)
 		}
@@ -98,7 +98,7 @@ func main() {
 		mu.Lock()
 		t++
 		req := &pb.Message{Message: name + " says: " + message, Timestamp: t}
-		log.Println("Client: "+name+" publishes message: "+req.Message+"at lamport timestamp:", req.Timestamp)
+		log.Println("Client "+name+" publishes message: \""+req.Message+"\" at lamport timestamp:", req.Timestamp)
 		if err := stream.Send(req); err != nil {
 			log.Printf("Error sending message to server: %v", err)
 		}
