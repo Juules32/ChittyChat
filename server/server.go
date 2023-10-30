@@ -7,10 +7,11 @@ import (
 	"os"
 	"sync"
 
-	pb "github.com/Juules32/GRPC/proto" // Import the generated protobuf code
+	pb "github.com/Juules32/GRPC/proto"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
+
+var t int32 = 0
 
 type chatServer struct {
 	clients map[pb.ChatService_SendMessageServer]struct{}
@@ -33,11 +34,17 @@ func (s *chatServer) SendMessage(stream pb.ChatService_SendMessageServer) error 
 		}
 		s.mu.Lock()
 
-		log.Println("Server receives and broadcasts message: \""+pub.Message+"\" with timestamp:", pub.Timestamp)
-		fmt.Println("Server receives and broadcasts message: \""+pub.Message+"\" with timestamp:", pub.Timestamp)
+		tReceived := pub.Timestamp
+		if tReceived > t {
+			t = tReceived
+		}
+		t++
+
+		log.Println("Server receives and broadcasts message: \""+pub.Message+"\" at timestamp:", t)
+		fmt.Println("Server receives and broadcasts message: \""+pub.Message+"\" at timestamp:", t)
 
 		// Broadcasts the message to all connected clients
-		s.broadcastMessage(pub.Message, pub.Timestamp)
+		s.broadcastMessage(pub.Message, t)
 
 		s.mu.Unlock()
 	}
@@ -87,6 +94,5 @@ func main() {
 	pb.RegisterChatServiceServer(grpcServer, &chatServer{
 		clients: make(map[pb.ChatService_SendMessageServer]struct{}),
 	})
-	reflection.Register(grpcServer)
 	grpcServer.Serve(lis)
 }

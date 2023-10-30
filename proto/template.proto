@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "https://github.com/Juules32/ChristiansAlgorithm/proto";
+option go_package = "github.com/Juules32/ChittyChat/proto";
 
 package chat;
 

@@ -1,18 +1,18 @@
-2023/10/26 19:19:24 Client Benjamin joins chat at lamport timestamp: 1
-2023/10/26 19:19:24 Server receives and broadcasts message: "Benjamin has joined the chat" with timestamp: 1
-2023/10/26 19:19:24 Client Benjamin receives broadcasted message: "Benjamin has joined the chat" at timestamp: 2
-2023/10/26 19:19:25 Client Benjamin publishes message: "Benjamin says: hej" at lamport timestamp: 3
-2023/10/26 19:19:25 Server receives and broadcasts message: "Benjamin says: hej" with timestamp: 3
-2023/10/26 19:19:25 Client Benjamin receives broadcasted message: "Benjamin says: hej" at timestamp: 4
-2023/10/26 19:19:35 Client Benjamin publishes message: "Benjamin says: " at lamport timestamp: 5
-2023/10/26 19:19:35 Client Benjamin leaves chat at lamport timestamp: 6
-2023/10/26 19:19:35 Server receives and broadcasts message: "Benjamin says: " with timestamp: 5
-2023/10/26 19:19:35 Server receives and broadcasts message: "Benjamin has left the chat" with timestamp: 6
-2023/10/26 19:19:35 Client Benjamin receives broadcasted message: "Benjamin says: " at timestamp: 7
-2023/10/26 19:19:35 Client Benjamin receives broadcasted message: "Benjamin has left the chat" at timestamp: 8
-2023/10/26 19:19:45 Client Benjamin joins chat at lamport timestamp: 1
-2023/10/26 19:19:45 Server receives and broadcasts message: "Benjamin has joined the chat" with timestamp: 1
-2023/10/26 19:19:45 Client Benjamin receives broadcasted message: "Benjamin has joined the chat" at timestamp: 2
-2023/10/26 19:19:48 Client Benjamin publishes message: "Benjamin says: Hej alle" at lamport timestamp: 3
-2023/10/26 19:19:48 Server receives and broadcasts message: "Benjamin says: Hej alle" with timestamp: 3
-2023/10/26 19:19:48 Client Benjamin receives broadcasted message: "Benjamin says: Hej alle" at timestamp: 4
+2023/10/30 13:08:19 Client benja joins chat at lamport timestamp: 1
+2023/10/30 13:08:19 Server receives and broadcasts message: "benja has joined the chat" at timestamp: 2
+2023/10/30 13:08:19 Client benja receives broadcasted message: "benja has joined the chat" at timestamp: 3
+2023/10/30 13:08:20 Client benja publishes message: "benja says: hej" at lamport timestamp: 4
+2023/10/30 13:08:20 Server receives and broadcasts message: "benja says: hej" at timestamp: 5
+2023/10/30 13:08:20 Client benja receives broadcasted message: "benja says: hej" at timestamp: 6
+2023/10/30 13:09:58 Client jakob joins chat at lamport timestamp: 1
+2023/10/30 13:09:58 Server receives and broadcasts message: "jakob has joined the chat" at timestamp: 6
+2023/10/30 13:09:58 Client benja receives broadcasted message: "jakob has joined the chat" at timestamp: 7
+2023/10/30 13:09:58 Client jakob receives broadcasted message: "jakob has joined the chat" at timestamp: 7
+2023/10/30 13:09:59 Client jakob publishes message: "jakob says: hej" at lamport timestamp: 8
+2023/10/30 13:09:59 Server receives and broadcasts message: "jakob says: hej" at timestamp: 9
+2023/10/30 13:09:59 Client jakob receives broadcasted message: "jakob says: hej" at timestamp: 10
+2023/10/30 13:09:59 Client benja receives broadcasted message: "jakob says: hej" at timestamp: 10
+2023/10/30 13:10:01 Client jakob leaves chat at lamport timestamp: 11
+2023/10/30 13:10:01 Server receives and broadcasts message: "jakob has left the chat" at timestamp: 12
+2023/10/30 13:10:01 Client benja receives broadcasted message: "jakob has left the chat" at timestamp: 13
+2023/10/30 13:10:01 Client jakob receives broadcasted message: "jakob has left the chat" at timestamp: 13
