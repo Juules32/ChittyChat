@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	pb "github.com/Juules32/GRPC/proto" // Import the generated protobuf code
+	pb "github.com/Juules32/GRPC/proto"
 	"google.golang.org/grpc"
 )
 
@@ -77,8 +77,10 @@ func main() {
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 
+	// Send leave message when terminal is closed
 	go func() {
-		<-sigCh // Wait for termination signal
+		// Wait for termination signal
+		<-sigCh
 		mu.Lock()
 		t++
 		leaveRequest := &pb.Message{Message: name + " has left the chat", Timestamp: t}
@@ -91,22 +93,30 @@ func main() {
 		os.Exit(0)
 	}()
 
+	// Publish messages
 	for {
 		fmt.Print("Please enter a message: ")
 		message, _ := reader.ReadString('\n')
 		message = strings.ReplaceAll(message, "\r\n", "")
-		if message != "" {
-			mu.Lock()
-			t++
-			req := &pb.Message{Message: name + " says: " + message, Timestamp: t}
-			log.Println("Client "+name+" publishes message: \""+req.Message+"\" at lamport timestamp:", req.Timestamp)
-			if err := stream.Send(req); err != nil {
-				log.Printf("Error sending message to server: %v", err)
-				return
-			}
-			mu.Unlock()
-			fmt.Println("Message sent successfully!")
-		}
-	}
 
+		// If message exceeds limit, trim the string to 128 characters
+		if len(message) > 128 {
+			message = message[:128]
+		}
+
+		if message == "" {
+			continue
+		}
+
+		mu.Lock()
+		t++
+		req := &pb.Message{Message: name + " says: " + message, Timestamp: t}
+		log.Println("Client "+name+" publishes message: \""+req.Message+"\" at lamport timestamp:", req.Timestamp)
+		if err := stream.Send(req); err != nil {
+			log.Printf("Error sending message to server: %v", err)
+			return
+		}
+		mu.Unlock()
+		fmt.Println("Message sent successfully!")
+	}
 }

@@ -7,9 +7,8 @@ import (
 	"os"
 	"sync"
 
-	pb "github.com/Juules32/GRPC/proto" // Import the generated protobuf code
+	pb "github.com/Juules32/GRPC/proto"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
 
 var t int32 = 0
@@ -95,6 +94,5 @@ func main() {
 	pb.RegisterChatServiceServer(grpcServer, &chatServer{
 		clients: make(map[pb.ChatService_SendMessageServer]struct{}),
 	})
-	reflection.Register(grpcServer)
 	grpcServer.Serve(lis)
 }
